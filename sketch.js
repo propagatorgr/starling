@@ -110,10 +110,20 @@ function windowResized() {
 }
 
 /* ---------- UI POSITION ---------- */
+
 function placeUI() {
-  legendDiv.position(260, 20);
-  infoDiv.position(260, 120);
+  // θέση υπομνήματος
+  const legendX = 260;
+  const legendY = 20;
+  legendDiv.position(legendX, legendY);
+
+  // overlay info: ΔΕΞΙΑ από το υπόμνημα
+  const legendWidth = legendDiv.elt.offsetWidth || 180;
+  const gap = 12;
+
+  infoDiv.position(legendX + legendWidth + gap, legendY);
 }
+
 
 /* ---------- DRAW ---------- */
 function draw() {
