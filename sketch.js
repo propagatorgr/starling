@@ -1,110 +1,122 @@
-let waterParticles = [];
-let proteinParticles = [];
-
-let pressureSlider;
-let glycocalyxCheckbox;
-
+// ================== ΡΥΘΜΙΣΕΙΣ ==================
 const CAP_X = 80;
-const CAP_Y = 150;
+const CAP_Y = 170;
 const CAP_W = 520;
 const CAP_H = 100;
 
+const INTER_X = CAP_X + CAP_W + 20;
+
+let water = [];
+let proteins = [];
+
+let pressureSlider;
+let glycocalyxChk;
+
+// ================== SETUP ==================
 function setup() {
-  const c = createCanvas(720, 400);
+  const c = createCanvas(760, 420);
   c.parent("sketch-holder");
 
-  pressureSlider = createSlider(0.2, 2, 1, 0.01);
+  pressureSlider = createSlider(0.5, 2.5, 1.2, 0.01);
   pressureSlider.position(20, 20);
   pressureSlider.style("width", "200px");
 
-  glycocalyxCheckbox = createCheckbox("Glycocalyx ενεργό", true);
-  glycocalyxCheckbox.position(20, 50);
+  glycocalyxChk = createCheckbox("Glycocalyx ενεργό", true);
+  glycocalyxChk.position(20, 50);
 
-  for (let i = 0; i < 120; i++) {
-    waterParticles.push(new WaterParticle());
-  }
-
-  for (let i = 0; i < 20; i++) {
-    proteinParticles.push(new ProteinParticle());
-  }
+  // σωματίδια
+  for (let i = 0; i < 160; i++) water.push(new Water());
+  for (let i = 0; i < 25; i++) proteins.push(new Protein());
 }
 
+// ================== DRAW ==================
 function draw() {
   background(245);
 
   drawLabels();
   drawCapillary();
-  drawGlycocalyx();
   drawInterstitial();
+  drawGlycocalyx();
 
-  for (let w of waterParticles) {
+  for (let w of water) {
     w.update();
     w.draw();
   }
 
-  for (let p of proteinParticles) {
-    p.update();
-    p.draw();
+  for (let p of proteins) p.draw();
+
+  drawLegend();
+}
+
+// ================== ΣΧΕΔΙΑΣΗ =================
+function drawCapillary() {
+  fill(180, 220, 255);
+  rect(CAP_X, CAP_Y, CAP_W, CAP_H);
+}
+
+function drawInterstitial() {
+  fill(230);
+  rect(INTER_X, CAP_Y - 10, 120, CAP_H + 20);
+}
+
+function drawGlycocalyx() {
+  if (glycocalyxChk.checked()) {
+    fill(160, 220, 160);
+    rect(CAP_X + CAP_W - 14, CAP_Y - 5, 14, CAP_H + 10);
   }
 }
 
 function drawLabels() {
   fill(0);
-  textSize(14);
+  textSize(13);
   text("Υδροστατική πίεση", 20, 15);
+  text("Τριχοειδές", CAP_X + 10, CAP_Y - 8);
+  text("Διάμεσος\nχώρος", INTER_X + 10, CAP_Y + 20);
 }
 
-function drawCapillary() {
-  fill(180, 220, 255);
-  rect(CAP_X, CAP_Y, CAP_W, CAP_H);
+function drawLegend() {
+  fill(255);
+  rect(540, 20, 200, 90, 8);
   fill(0);
-  text("Τριχοειδές", CAP_X + 10, CAP_Y - 5);
-}
+  text("ΥΠΟΜΝΗΜΑ", 550, 38);
 
-function drawGlycocalyx() {
-  if (glycocalyxCheckbox.checked()) {
-    fill(160, 220, 160);
-    rect(CAP_X + CAP_W - 15, CAP_Y - 5, 15, CAP_H + 10);
-    fill(0);
-    textSize(11);
-    text("Glycocalyx", CAP_X + CAP_W - 65, CAP_Y - 10);
-  }
-}
-
-function drawInterstitial() {
-  fill(230);
-  rect(CAP_X + CAP_W + 20, CAP_Y - 10, 100, CAP_H + 20);
+  fill(0, 100, 255);
+  circle(555, 55, 6);
   fill(0);
-  textSize(12);
-  text("Διάμεσος\nχώρος", CAP_X + CAP_W + 25, CAP_Y + 20);
+  text("Νερό", 570, 59);
+
+  fill(220, 0, 0);
+  circle(555, 75, 8);
+  fill(0);
+  text("Πρωτεΐνες", 570, 79);
 }
 
-/* ================= PARTICLES ================= */
-
-class WaterParticle {
+// ================== ΣΩΜΑΤΙΔΙΑ =================
+class Water {
   constructor() {
-    this.x = random(CAP_X + 10, CAP_X + CAP_W - 30);
-    this.y = random(CAP_Y + 10, CAP_Y + CAP_H - 10);
-    this.vx = random(0.2, 0.6);
+    this.reset();
+  }
+
+  reset() {
+    this.x = random(CAP_X + 10, CAP_X + CAP_W - 40);
+    this.y = random(CAP_Y + 8, CAP_Y + CAP_H - 8);
+    this.v = random(0.4, 1.1);
   }
 
   update() {
-    let pressure = pressureSlider.value();
+    const P = pressureSlider.value();
 
-    // προς τα έξω
-    this.x += this.vx * pressure;
+    // κύρια ροή: ΠΑΝΤΑ προς τα έξω
+    this.x += this.v * P;
 
-    // μπλοκάρισμα επιστροφής αν glycocalyx ON
-    if (glycocalyxCheckbox.checked()) {
-      if (this.x > CAP_X + CAP_W - 18) {
-        this.x = CAP_X + CAP_W - 18;
-      }
+    // ΕΠΑΝΑΡΡΟΦΗΣΗ ΜΟΝΟ ΧΩΡΙΣ GLYCOCALYX (μικρό ποσοστό)
+    if (!glycocalyxChk.checked() && random() < 0.012) {
+      this.x -= this.v * 1.5;
     }
 
-    // εκτός οθόνης → επανεισαγωγή
-    if (this.x > width) {
-      this.x = random(CAP_X + 10, CAP_X + 200);
-      this.y = random(CAP_Y + 10, CAP_Y + CAP_H - 10);
+    // όρια
+    if (this.x > width || this.x < CAP_X + 5) {
+      this.reset();
     }
   }
 
@@ -115,21 +127,15 @@ class WaterParticle {
   }
 }
 
-class ProteinParticle {
+class Protein {
   constructor() {
-    this.x = random(CAP_X + 15, CAP_X + CAP_W - 40);
-    this.y = random(CAP_Y + 15, CAP_Y + CAP_H - 15);
-  }
-
-  update() {
-    // Πρωτεΐνες: δεν περνούν ποτέ
-    this.x += random(-0.1, 0.1);
-    this.y += random(-0.1, 0.1);
+    this.x = random(CAP_X + 15, CAP_X + CAP_W - 50);
+    this.y = random(CAP_Y + 10, CAP_Y + CAP_H - 10);
   }
 
   draw() {
-    noStroke();
     fill(220, 0, 0);
-    circle(this.x, this.y, 7);
+    noStroke();
+    circle(this.x, this.y, 8);
   }
 }
