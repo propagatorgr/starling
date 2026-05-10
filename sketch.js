@@ -93,7 +93,11 @@ function drawLabels() {
 
 /* ---------- ΥΠΟΜΝΗΜΑ ---------- */
 function drawLegend() {
-  const x = 20, y = 115, w = 170, h = 70;
+  // τοποθέτηση ΔΕΞΙΑ, μετά τον διάμεσο χώρο
+  const x = INTER_X + 140;
+  const y = CAP_Y - 10;
+  const w = 170;
+  const h = 70;
 
   noStroke();
   fill(255, 245);
