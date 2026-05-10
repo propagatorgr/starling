@@ -101,6 +101,7 @@ class Water {
     this.x = random(CAP_X + 10, CAP_X + CAP_W - 40);
     this.y = random(CAP_Y + 8, CAP_Y + CAP_H - 8);
     this.v = random(0.4, 1.1);
+    this.backflow = false; // <-- αν κάνει επαναρρόφηση
   }
 
   update() {
@@ -108,10 +109,12 @@ class Water {
 
     // κύρια ροή: ΠΑΝΤΑ προς τα έξω
     this.x += this.v * P;
+    this.backflow = false;
 
-    // ΕΠΑΝΑΡΡΟΦΗΣΗ ΜΟΝΟ ΧΩΡΙΣ GLYCOCALYX (μικρό ποσοστό)
-    if (!glycocalyxChk.checked() && random() < 0.012) {
-      this.x -= this.v * 1.5;
+    // ΕΠΑΝΑΡΡΟΦΗΣΗ ΜΟΝΟ ΧΩΡΙΣ GLYCOCALYX
+    if (!glycocalyxChk.checked() && random() < 0.015) {
+      this.x -= this.v * 1.8;
+      this.backflow = true;
     }
 
     // όρια
@@ -122,11 +125,14 @@ class Water {
 
   draw() {
     noStroke();
-    fill(0, 100, 255);
+    if (this.backflow) {
+      fill(150, 0, 200); // 🟣 μωβ = επαναρρόφηση
+    } else {
+      fill(0, 100, 255); // 🔵 μπλε = διήθηση
+    }
     circle(this.x, this.y, 4);
   }
 }
-
 class Protein {
   constructor() {
     this.x = random(CAP_X + 15, CAP_X + CAP_W - 50);
