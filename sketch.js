@@ -1,11 +1,14 @@
 /* ======================================================
-   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – INTERACTIVE ΠΡΟΣΟΜΟΙΩΣΗ
-   Τελική σταθερή έκδοση
+   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – RESPONSIVE ΠΡΟΣΟΜΟΙΩΣΗ
    ====================================================== */
 
-/* ---------- ΓΕΩΜΕΤΡΙΑ ---------- */
+/* ---------- ΣΧΕΔΙΑΣΤΙΚΕΣ ΔΙΑΣΤΑΣΕΙΣ ---------- */
+const DESIGN_W = 800;
+const DESIGN_H = 440;
+
+/* ---------- ΓΕΩΜΕΤΡΙΑ (σε σχεδιαστικές μονάδες) ---------- */
 const CAP_X = 80;
-const CAP_Y = 190;
+const CAP_Y = 200;
 const CAP_W = 520;
 const CAP_H = 100;
 const INTER_X = CAP_X + CAP_W + 20;
@@ -18,7 +21,9 @@ let glycocalyxChk;
 
 /* ---------- SETUP ---------- */
 function setup() {
-  const c = createCanvas(780, 430);
+  const cw = min(windowWidth - 20, DESIGN_W);
+  const ch = cw * (DESIGN_H / DESIGN_W);
+  const c = createCanvas(cw, ch);
   c.parent("sketch-holder");
 
   pressureSlider = createSlider(0.6, 2.5, 1.2, 0.01);
@@ -32,9 +37,20 @@ function setup() {
   for (let i = 0; i < 28; i++) proteins.push(new Protein());
 }
 
+/* ---------- RESPONSIVE ---------- */
+function windowResized() {
+  const cw = min(windowWidth - 20, DESIGN_W);
+  const ch = cw * (DESIGN_H / DESIGN_W);
+  resizeCanvas(cw, ch);
+}
+
 /* ---------- DRAW ---------- */
 function draw() {
   background(245);
+
+  // 🔑 ΚΛΙΜΑΚΩΣΗ ΟΛΟΥ ΤΟΥ ΣΧΕΔΙΟΥ
+  const s = width / DESIGN_W;
+  scale(s);
 
   drawCapillary();
   drawInterstitial();
@@ -50,7 +66,7 @@ function draw() {
   for (let p of proteins) p.draw();
 }
 
-/* ---------- ΣΧΕΔΙΑΣΗ ΧΩΡΩΝ ---------- */
+/* ---------- ΣΧΕΔΙΑΣΗ ---------- */
 function drawCapillary() {
   fill(180, 220, 255);
   rect(CAP_X, CAP_Y, CAP_W, CAP_H);
@@ -71,14 +87,13 @@ function drawGlycocalyx() {
 function drawLabels() {
   fill(0);
   textSize(13);
-  text("Υδροστατική πίεση", 20, 15);
   text("Τριχοειδές", CAP_X + 10, CAP_Y - 8);
   text("Διάμεσος\nχώρος", INTER_X + 12, CAP_Y + 20);
 }
 
-/* ---------- ΥΠΟΜΝΗΜΑ (ΔΙΑΚΡΙΤΙΚΟ) ---------- */
+/* ---------- ΥΠΟΜΝΗΜΑ ---------- */
 function drawLegend() {
-  const x = 20, y = 90, w = 170, h = 70;
+  const x = 20, y = 115, w = 170, h = 70;
 
   noStroke();
   fill(255, 245);
@@ -104,7 +119,7 @@ function drawLegend() {
   text("Πρωτεΐνες", x + 30, y + 65);
 }
 
-/* ---------- ΣΩΜΑΤΙΔΙΑ ΝΕΡΟΥ ---------- */
+/* ---------- ΝΕΡΟ ---------- */
 class Water {
   constructor() {
     this.reset();
@@ -114,30 +129,28 @@ class Water {
     this.x = random(CAP_X + 12, CAP_X + CAP_W - 40);
     this.y = random(CAP_Y + 8, CAP_Y + CAP_H - 8);
     this.v = random(0.6, 1.1);
-    this.state = "out";   // out = διήθηση, in = επαναρρόφηση
-    this.alpha = 255;     // για fade‑in
+    this.state = "out";   // out / in
+    this.alpha = 255;
   }
 
   update() {
     const P = pressureSlider.value();
 
     if (this.state === "out") {
-      // ΠΑΝΤΑ διήθηση προς τα έξω
       this.x += this.v * P;
 
-      // ΣΠΑΝΙΑ επαναρρόφηση (μόνο χωρίς glycocalyx)
+      // ΠΑΛΙΑ Starling (χωρίς glycocalyx)
       if (!glycocalyxChk.checked() && random() < 0.004) {
         this.state = "in";
-        this.alpha = 0;   // ξεκινά fade‑in
+        this.alpha = 0;
       }
     }
     else if (this.state === "in") {
-      // Ήπια, περιορισμένη επιστροφή
       this.x -= this.v * 1.2;
-      this.alpha = min(this.alpha + 12, 255); // fade‑in
+      this.alpha = min(this.alpha + 12, 255);
     }
 
-    if (this.x > width || this.x < CAP_X + 6) {
+    if (this.x > DESIGN_W || this.x < CAP_X + 6) {
       this.reset();
     }
   }
@@ -145,10 +158,10 @@ class Water {
   draw() {
     noStroke();
     if (this.state === "in") {
-      fill(150, 0, 200, this.alpha); // 🟣 fade‑in επαναρρόφηση
+      fill(150, 0, 200, this.alpha);
       circle(this.x, this.y, 5);
     } else {
-      fill(0, 100, 255);              // 🔵 διήθηση
+      fill(0, 100, 255);
       circle(this.x, this.y, 4);
     }
   }
