@@ -77,31 +77,30 @@ function drawLabels() {
 
 /* ---------- ΥΠΟΜΝΗΜΑ (ΤΕΛΙΚΟ & ΚΑΘΑΡΟ) ---------- */
 function drawLegend() {
-  const x = 20, y = 90, w = 200, h = 75;
+  const x = 20, y = 90, w = 170, h = 70;
 
-  stroke(0);
-  fill(255);
-  rect(x, y, w, h, 8);
   noStroke();
+  fill(255, 245);   // ελαφρώς διαφανές
+  rect(x, y, w, h, 6);
 
   fill(0);
-  textSize(13);
-  text("ΥΠΟΜΝΗΜΑ", x + 10, y + 18);
+  textSize(12);
+  text("Υπόμνημα", x + 10, y + 16);
 
   fill(0, 100, 255);
-  circle(x + 15, y + 35, 5);
+  circle(x + 15, y + 32, 4);
   fill(0);
-  text("Νερό (διήθηση)", x + 30, y + 39);
+  text("Νερό", x + 30, y + 35);
 
   fill(150, 0, 200);
-  circle(x + 15, y + 53, 5);
+  circle(x + 15, y + 47, 4);
   fill(0);
-  text("Επαναρρόφηση", x + 30, y + 57);
+  text("Νερό (επιστροφή)", x + 30, y + 50);
 
   fill(220, 0, 0);
-  circle(x + 15, y + 71, 6);
+  circle(x + 15, y + 62, 5);
   fill(0);
-  text("Πρωτεΐνες", x + 30, y + 75);
+  text("Πρωτεΐνες", x + 30, y + 65);
 }
 
 /* ---------- ΣΩΜΑΤΙΔΙΑ ---------- */
