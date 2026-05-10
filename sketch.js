@@ -2,34 +2,37 @@
    ΝΕΑ ΕΞΙΣΩΣΗ STARLING – ΤΕΛΙΚΗ ΔΙΔΑΚΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ
    ====================================================== */
 
-/* ---------- ΣΧΕΔΙΑΣΤΙΚΕΣ ΔΙΑΣΤΑΣΕΙΣ ---------- */
+/* ---------- DESIGN SIZE ---------- */
 const DESIGN_W = 800;
 const DESIGN_H = 440;
 
-/* ---------- ΓΕΩΜΕΤΡΙΑ ---------- */
+/* ---------- GEOMETRY ---------- */
 const CAP_X = 80;
 const CAP_Y = 200;
 const CAP_W = 520;
 const CAP_H = 100;
 const INTER_X = CAP_X + CAP_W + 20;
 
-/* ---------- ΚΑΤΑΣΤΑΣΗ ---------- */
+/* ---------- STATE ---------- */
 let water = [];
 let proteins = [];
 
 let pressureSlider;
 let glycocalyxChk;
 
-/* ---------- LEGEND & INFO DOM ---------- */
-let legendDiv, legendHeader, legendContent, legendOpen = false;
-let infoDiv, infoOpen = false;
+/* ---------- LEGEND ---------- */
+let legendDiv, legendHeader, legendContent;
+let legendOpen = false;
+
+/* ---------- INFO ---------- */
+let infoBtn, infoDiv;
+let infoOpen = false;
 
 /* ---------- SETUP ---------- */
 function setup() {
   const cw = min(windowWidth - 20, DESIGN_W);
   const ch = cw * (DESIGN_H / DESIGN_W);
-  const c = createCanvas(cw, ch);
-  c.parent("sketch-holder");
+  createCanvas(cw, ch).parent("sketch-holder");
 
   /* --- Slider --- */
   pressureSlider = createSlider(0.6, 2.5, 1.2, 0.01);
@@ -41,10 +44,10 @@ function setup() {
   glycocalyxChk.position(20, 50);
 
   /* ==================================================
-     COLLAPSIBLE LEGEND (p5 DOM)
+     COLLAPSIBLE LEGEND – κοντά στο slider
      ================================================== */
   legendDiv = createDiv();
-  styleBox(legendDiv, 170);
+  styleBox(legendDiv, 180);
 
   legendHeader = createDiv("Υπόμνημα ▸");
   legendHeader.parent(legendDiv);
@@ -66,8 +69,16 @@ function setup() {
   });
 
   /* ==================================================
-     OVERLAY INFO (p5 DOM)
+     INFO BUTTON – ΠΟΛΥ ΔΕΞΙΑ
      ================================================== */
+  infoBtn = createButton("ℹ️ Τι δείχνει αυτό;");
+  infoBtn.style("position", "absolute");
+  infoBtn.mousePressed(() => {
+    infoOpen = !infoOpen;
+    infoDiv.style("display", infoOpen ? "block" : "none");
+  });
+
+  /* INFO PANEL – ανοίγει ΚΑΤΩ */
   infoDiv = createDiv(`
     <strong>Τι δείχνει το μοντέλο</strong><br><br>
 
@@ -84,19 +95,12 @@ function setup() {
     Η διαφορά δεν είναι η πίεση,
     αλλά το <strong>μοντέλο του τριχοειδικού τοιχώματος</strong>.
   `);
-  styleBox(infoDiv, 320);
+  styleBox(infoDiv, 300);
   infoDiv.style("display", "none");
-
-  const infoBtn = createButton("ℹ️ Τι δείχνει αυτό;");
-  infoBtn.position(260, 80);
-  infoBtn.mousePressed(() => {
-    infoOpen = !infoOpen;
-    infoDiv.style("display", infoOpen ? "block" : "none");
-  });
 
   placeUI();
 
-  /* --- Σωματίδια --- */
+  /* --- Particles --- */
   for (let i = 0; i < 170; i++) water.push(new Water());
   for (let i = 0; i < 28; i++) proteins.push(new Protein());
 }
@@ -109,21 +113,18 @@ function windowResized() {
   placeUI();
 }
 
-/* ---------- UI POSITION ---------- */
-
+/* ---------- UI POSITIONING ---------- */
 function placeUI() {
-  // θέση υπομνήματος
-  const legendX = 260;
-  const legendY = 20;
-  legendDiv.position(legendX, legendY);
+  // Υπόμνημα – κοντά στο slider
+  legendDiv.position(260, 20);
 
-  // overlay info: ΔΕΞΙΑ από το υπόμνημα
-  const legendWidth = legendDiv.elt.offsetWidth || 180;
-  const gap = 12;
+  // Info button – πολύ δεξιά
+  const infoX = min(windowWidth - 200, DESIGN_W - 160);
+  const infoY = 20;
 
-  infoDiv.position(legendX + legendWidth + gap, legendY);
+  infoBtn.position(infoX, infoY);
+  infoDiv.position(infoX, infoY + 40); // ΑΝΟΙΓΕΙ ΠΡΟΣ ΤΑ ΚΑΤΩ
 }
-
 
 /* ---------- DRAW ---------- */
 function draw() {
@@ -144,7 +145,7 @@ function draw() {
   for (let p of proteins) p.draw();
 }
 
-/* ---------- ΣΧΕΔΙΑΣΗ ---------- */
+/* ---------- DRAWING ---------- */
 function drawCapillary() {
   fill(180, 220, 255);
   rect(CAP_X, CAP_Y, CAP_W, CAP_H);
@@ -169,17 +170,15 @@ function drawLabels() {
   text("Διάμεσος\nχώρος", INTER_X + 12, CAP_Y + 20);
 }
 
-/* ---------- ΝΕΡΟ ---------- */
+/* ---------- WATER ---------- */
 class Water {
-  constructor() {
-    this.reset();
-  }
+  constructor() { this.reset(); }
 
   reset() {
     this.x = random(CAP_X + 12, CAP_X + CAP_W - 40);
     this.y = random(CAP_Y + 8, CAP_Y + CAP_H - 8);
     this.v = random(0.6, 1.1);
-    this.state = "out";   // out / in
+    this.state = "out";
     this.alpha = 255;
   }
 
@@ -189,12 +188,12 @@ class Water {
     if (this.state === "out") {
       this.x += this.v * P;
 
-      // Παλιά Starling → επαναρρόφηση ΜΟΝΟ χωρίς glycocalyx
+      // Παλιά Starling (χωρίς glycocalyx)
       if (!glycocalyxChk.checked() && random() < 0.004) {
         this.state = "in";
         this.alpha = 0;
       }
-    }
+    } 
     else if (this.state === "in") {
       this.x -= this.v * 1.2;
       this.alpha = min(this.alpha + 12, 255);
@@ -217,7 +216,7 @@ class Water {
   }
 }
 
-/* ---------- ΠΡΩΤΕΪΝΕΣ ---------- */
+/* ---------- PROTEINS ---------- */
 class Protein {
   constructor() {
     this.x = random(CAP_X + 16, CAP_X + CAP_W - 50);
@@ -236,7 +235,7 @@ function styleBox(div, w) {
   div.style("position", "absolute");
   div.style("background", "#fff");
   div.style("border-radius", "10px");
-  div.style("box-shadow", "0 2px 8px rgba(0,0,0,0.2)");
+  div.style("box-shadow", "0 4px 12px rgba(0,0,0,0.25)");
   div.style("padding", "10px 14px");
   div.style("font-size", "14px");
   div.style("max-width", w + "px");
@@ -246,5 +245,4 @@ function styleHeader(h) {
   h.style("cursor", "pointer");
   h.style("font-weight", "bold");
   h.style("user-select", "none");
-  h.style("margin-bottom", "4px");
 }
