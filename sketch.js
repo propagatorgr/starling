@@ -56,7 +56,7 @@ function draw() {
   drawInterstitial();
   drawGlycocalyx();
   drawLabels();
-  drawLegend();
+  
 
   for (let w of water) {
     w.update();
@@ -92,38 +92,6 @@ function drawLabels() {
 }
 
 /* ---------- ΥΠΟΜΝΗΜΑ ---------- */
-function drawLegend() {
-  const margin = 20;
-  const w = 170;
-  const h = 70;
-
-  // αγκύρωση στη ΔΕΞΙΑ πλευρά του DESIGN canvas
-  const x = DESIGN_W - w - margin;
-  const y = CAP_Y - 10;
-
-  noStroke();
-  fill(255, 245);
-  rect(x, y, w, h, 6);
-
-  fill(0);
-  textSize(12);
-  text("Υπόμνημα", x + 10, y + 16);
-
-  fill(0, 100, 255);
-  circle(x + 15, y + 32, 4);
-  fill(0);
-  text("Νερό", x + 30, y + 35);
-
-  fill(150, 0, 200);
-  circle(x + 15, y + 47, 4);
-  fill(0);
-  text("Νερό (επιστροφή)", x + 30, y + 50);
-
-  fill(220, 0, 0);
-  circle(x + 15, y + 62, 5);
-  fill(0);
-  text("Πρωτεΐνες", x + 30, y + 65);
-}
 
 /* ---------- ΝΕΡΟ ---------- */
 class Water {
