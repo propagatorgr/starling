@@ -1,5 +1,6 @@
 /* ======================================================
-   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – ΔΙΔΑΚΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ
+   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – INTERACTIVE ΠΡΟΣΟΜΟΙΩΣΗ
+   Τελική σταθερή έκδοση
    ====================================================== */
 
 /* ---------- ΓΕΩΜΕΤΡΙΑ ---------- */
@@ -75,12 +76,12 @@ function drawLabels() {
   text("Διάμεσος\nχώρος", INTER_X + 12, CAP_Y + 20);
 }
 
-/* ---------- ΥΠΟΜΝΗΜΑ (ΤΕΛΙΚΟ & ΚΑΘΑΡΟ) ---------- */
+/* ---------- ΥΠΟΜΝΗΜΑ (ΔΙΑΚΡΙΤΙΚΟ) ---------- */
 function drawLegend() {
   const x = 20, y = 90, w = 170, h = 70;
 
   noStroke();
-  fill(255, 245);   // ελαφρώς διαφανές
+  fill(255, 245);
   rect(x, y, w, h, 6);
 
   fill(0);
@@ -103,7 +104,7 @@ function drawLegend() {
   text("Πρωτεΐνες", x + 30, y + 65);
 }
 
-/* ---------- ΣΩΜΑΤΙΔΙΑ ---------- */
+/* ---------- ΣΩΜΑΤΙΔΙΑ ΝΕΡΟΥ ---------- */
 class Water {
   constructor() {
     this.reset();
@@ -113,24 +114,27 @@ class Water {
     this.x = random(CAP_X + 12, CAP_X + CAP_W - 40);
     this.y = random(CAP_Y + 8, CAP_Y + CAP_H - 8);
     this.v = random(0.6, 1.1);
-    this.state = "out"; // out = διήθηση, in = επαναρρόφηση
+    this.state = "out";   // out = διήθηση, in = επαναρρόφηση
+    this.alpha = 255;     // για fade‑in
   }
 
   update() {
     const P = pressureSlider.value();
 
     if (this.state === "out") {
-      // ΚΥΡΙΑ ΡΟΗ ΠΡΟΣ ΤΑ ΕΞΩ
+      // ΠΑΝΤΑ διήθηση προς τα έξω
       this.x += this.v * P;
 
-      // ΠΟΛΥ ΠΕΡΙΟΡΙΣΜΕΝΗ ΕΠΑΝΑΡΡΟΦΗΣΗ (μόνο χωρίς glycocalyx)
+      // ΣΠΑΝΙΑ επαναρρόφηση (μόνο χωρίς glycocalyx)
       if (!glycocalyxChk.checked() && random() < 0.004) {
         this.state = "in";
+        this.alpha = 0;   // ξεκινά fade‑in
       }
     }
     else if (this.state === "in") {
-      // ΑΡΓΗ & ΣΥΝΤΟΜΗ ΚΙΝΗΣΗ ΠΡΟΣ ΤΑ ΜΕΣΑ
+      // Ήπια, περιορισμένη επιστροφή
       this.x -= this.v * 1.2;
+      this.alpha = min(this.alpha + 12, 255); // fade‑in
     }
 
     if (this.x > width || this.x < CAP_X + 6) {
@@ -141,15 +145,16 @@ class Water {
   draw() {
     noStroke();
     if (this.state === "in") {
-      fill(150, 0, 200);  // μωβ
+      fill(150, 0, 200, this.alpha); // 🟣 fade‑in επαναρρόφηση
       circle(this.x, this.y, 5);
     } else {
-      fill(0, 100, 255);  // μπλε
+      fill(0, 100, 255);              // 🔵 διήθηση
       circle(this.x, this.y, 4);
     }
   }
 }
 
+/* ---------- ΠΡΩΤΕΪΝΕΣ ---------- */
 class Protein {
   constructor() {
     this.x = random(CAP_X + 16, CAP_X + CAP_W - 50);
