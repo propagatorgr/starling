@@ -1,14 +1,13 @@
-// ================== ΡΥΘΜΙΣΕΙΣ ==================
+// ================== ΓΕΩΜΕΤΡΙΑ ==================
 const CAP_X = 80;
-const CAP_Y = 170;
+const CAP_Y = 200;
 const CAP_W = 520;
 const CAP_H = 100;
-
 const INTER_X = CAP_X + CAP_W + 20;
 
+// ================== ΚΑΤΑΣΤΑΣΗ ==================
 let water = [];
 let proteins = [];
-
 let pressureSlider;
 let glycocalyxChk;
 
@@ -24,7 +23,6 @@ function setup() {
   glycocalyxChk = createCheckbox("Glycocalyx ενεργό", true);
   glycocalyxChk.position(20, 50);
 
-  // σωματίδια
   for (let i = 0; i < 160; i++) water.push(new Water());
   for (let i = 0; i < 25; i++) proteins.push(new Protein());
 }
@@ -33,22 +31,20 @@ function setup() {
 function draw() {
   background(245);
 
-  drawLabels();
   drawCapillary();
   drawInterstitial();
   drawGlycocalyx();
+  drawLabels();
+  drawLegend();
 
   for (let w of water) {
     w.update();
     w.draw();
   }
-
   for (let p of proteins) p.draw();
-
-  drawLegend();
 }
 
-// ================== ΣΧΕΔΙΑΣΗ =================
+// ================== ΣΧΕΔΙΑΣΗ ==================
 function drawCapillary() {
   fill(180, 220, 255);
   rect(CAP_X, CAP_Y, CAP_W, CAP_H);
@@ -74,28 +70,33 @@ function drawLabels() {
   text("Διάμεσος\nχώρος", INTER_X + 10, CAP_Y + 20);
 }
 
+// ================== ΥΠΟΜΝΗΜΑ (ασφαλές) ==================
 function drawLegend() {
+  const x = 20, y = 90, w = 230, h = 80;
   fill(255);
-  rect(540, 20, 200, 90, 8);
+  stroke(0);
+  rect(x, y, w, h, 8);
+  noStroke();
   fill(0);
-  text("ΥΠΟΜΝΗΜΑ", 550, 38);
+  text("ΥΠΟΜΝΗΜΑ", x + 10, y + 18);
 
   fill(0, 100, 255);
-  circle(555, 55, 6);
+  circle(x + 15, y + 35, 6);
   fill(0);
-  text("Νερό", 570, 59);
+  text("Νερό (διήθηση)", x + 30, y + 39);
+
+  fill(150, 0, 200);
+  circle(x + 15, y + 55, 8);
+  fill(0);
+  text("Επαναρρόφηση\n(χωρίς glycocalyx)", x + 30, y + 57);
 
   fill(220, 0, 0);
-  circle(555, 75, 8);
+  circle(x + 15, y + 75, 8);
   fill(0);
-  text("Πρωτεΐνες", 570, 79);
-  fill(150, 0, 200);
-circle(555, 95, 6);
-fill(0);
-text("Επαναρρόφηση (χωρίς glycocalyx)", 570, 99);
+  text("Πρωτεΐνες", x + 30, y + 79);
 }
 
-// ================== ΣΩΜΑΤΙΔΙΑ =================
+// ================== ΣΩΜΑΤΙΔΙΑ ==================
 class Water {
   constructor() {
     this.reset();
@@ -105,38 +106,37 @@ class Water {
     this.x = random(CAP_X + 10, CAP_X + CAP_W - 40);
     this.y = random(CAP_Y + 8, CAP_Y + CAP_H - 8);
     this.v = random(0.4, 1.1);
-    this.backflow = false; // <-- αν κάνει επαναρρόφηση
+    this.backflow = false;
   }
 
   update() {
     const P = pressureSlider.value();
-
-    // κύρια ροή: ΠΑΝΤΑ προς τα έξω
-    this.x += this.v * P;
     this.backflow = false;
 
-    // ΕΠΑΝΑΡΡΟΦΗΣΗ ΜΟΝΟ ΧΩΡΙΣ GLYCOCALYX
-    if (!glycocalyxChk.checked() && random() < 0.015) {
-      this.x -= this.v * 1.8;
+    // Βασική διήθηση (ΠΑΝΤΑ)
+    this.x += this.v * P;
+
+    // Επαναρρόφηση ΜΟΝΟ χωρίς glycocalyx
+    if (!glycocalyxChk.checked() && random() < 0.02) {
+      this.x -= this.v * 2.5;
       this.backflow = true;
     }
 
-    // όρια
-    if (this.x > width || this.x < CAP_X + 5) {
-      this.reset();
-    }
+    if (this.x > width || this.x < CAP_X + 5) this.reset();
   }
 
   draw() {
     noStroke();
     if (this.backflow) {
-      fill(150, 0, 200); // 🟣 μωβ = επαναρρόφηση
+      fill(150, 0, 200);
+      circle(this.x, this.y, 7);
     } else {
-      fill(0, 100, 255); // 🔵 μπλε = διήθηση
+      fill(0, 100, 255);
+      circle(this.x, this.y, 4);
     }
-    circle(this.x, this.y, 4);
   }
 }
+
 class Protein {
   constructor() {
     this.x = random(CAP_X + 15, CAP_X + CAP_W - 50);
@@ -149,3 +149,4 @@ class Protein {
     circle(this.x, this.y, 8);
   }
 }
+``
