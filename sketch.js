@@ -1,9 +1,8 @@
-/* =========================================================
-   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – INTERACTIVE ΠΡΟΣΟΜΟΙΩΣΗ
-   Δημιουργός: (το όνομά σου)
-   ========================================================= */
+/* ======================================================
+   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – ΔΙΔΑΚΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ
+   ====================================================== */
 
-/* ---------- ΓΕΩΜΕΤΡΙΑ ΧΩΡΩΝ ---------- */
+/* ---------- ΓΕΩΜΕΤΡΙΑ ---------- */
 const CAP_X = 80;
 const CAP_Y = 190;
 const CAP_W = 520;
@@ -46,6 +45,7 @@ function draw() {
     w.update();
     w.draw();
   }
+
   for (let p of proteins) p.draw();
 }
 
@@ -75,9 +75,9 @@ function drawLabels() {
   text("Διάμεσος\nχώρος", INTER_X + 12, CAP_Y + 20);
 }
 
-/* ---------- ΥΠΟΜΝΗΜΑ (ΣΤΑΘΕΡΟ, ΚΑΘΑΡΟ) ---------- */
+/* ---------- ΥΠΟΜΝΗΜΑ (ΤΕΛΙΚΟ & ΚΑΘΑΡΟ) ---------- */
 function drawLegend() {
-  const x = 20, y = 90, w = 230, h = 90;
+  const x = 20, y = 90, w = 200, h = 75;
 
   stroke(0);
   fill(255);
@@ -89,19 +89,19 @@ function drawLegend() {
   text("ΥΠΟΜΝΗΜΑ", x + 10, y + 18);
 
   fill(0, 100, 255);
-  circle(x + 15, y + 38, 6);
+  circle(x + 15, y + 35, 5);
   fill(0);
-  text("Νερό (διήθηση)", x + 30, y + 42);
+  text("Νερό (διήθηση)", x + 30, y + 39);
 
   fill(150, 0, 200);
-  circle(x + 15, y + 58, 8);
+  circle(x + 15, y + 53, 5);
   fill(0);
-  text("Επαναρρόφηση\n(μόνο χωρίς glycocalyx)", x + 30, y + 61);
+  text("Επαναρρόφηση", x + 30, y + 57);
 
   fill(220, 0, 0);
-  circle(x + 15, y + 82, 8);
+  circle(x + 15, y + 71, 6);
   fill(0);
-  text("Πρωτεΐνες", x + 30, y + 85);
+  text("Πρωτεΐνες", x + 30, y + 75);
 }
 
 /* ---------- ΣΩΜΑΤΙΔΙΑ ---------- */
@@ -113,7 +113,7 @@ class Water {
   reset() {
     this.x = random(CAP_X + 12, CAP_X + CAP_W - 40);
     this.y = random(CAP_Y + 8, CAP_Y + CAP_H - 8);
-    this.v = random(0.5, 1.0);
+    this.v = random(0.6, 1.1);
     this.state = "out"; // out = διήθηση, in = επαναρρόφηση
   }
 
@@ -121,17 +121,17 @@ class Water {
     const P = pressureSlider.value();
 
     if (this.state === "out") {
-      // ΠΑΝΤΑ διήθηση προς τα έξω
+      // ΚΥΡΙΑ ΡΟΗ ΠΡΟΣ ΤΑ ΕΞΩ
       this.x += this.v * P;
 
-      // Επαναρρόφηση ΜΟΝΟ αν ΔΕΝ υπάρχει glycocalyx
-      if (!glycocalyxChk.checked() && random() < 0.012) {
+      // ΠΟΛΥ ΠΕΡΙΟΡΙΣΜΕΝΗ ΕΠΑΝΑΡΡΟΦΗΣΗ (μόνο χωρίς glycocalyx)
+      if (!glycocalyxChk.checked() && random() < 0.004) {
         this.state = "in";
       }
     }
     else if (this.state === "in") {
-      // ΣΥΝΕΧΗΣ κίνηση προς τα μέσα
-      this.x -= this.v * 2.4;
+      // ΑΡΓΗ & ΣΥΝΤΟΜΗ ΚΙΝΗΣΗ ΠΡΟΣ ΤΑ ΜΕΣΑ
+      this.x -= this.v * 1.2;
     }
 
     if (this.x > width || this.x < CAP_X + 6) {
@@ -142,10 +142,10 @@ class Water {
   draw() {
     noStroke();
     if (this.state === "in") {
-      fill(150, 0, 200);  // 🟣 επαναρρόφηση
-      circle(this.x, this.y, 7);
+      fill(150, 0, 200);  // μωβ
+      circle(this.x, this.y, 5);
     } else {
-      fill(0, 100, 255);  // 🔵 διήθηση
+      fill(0, 100, 255);  // μπλε
       circle(this.x, this.y, 4);
     }
   }
@@ -160,7 +160,6 @@ class Protein {
   draw() {
     fill(220, 0, 0);
     noStroke();
-    circle(this.x, this.y, 8);
+    circle(this.x, this.y, 7);
   }
 }
-``
