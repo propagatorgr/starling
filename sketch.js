@@ -93,11 +93,13 @@ function drawLabels() {
 
 /* ---------- ΥΠΟΜΝΗΜΑ ---------- */
 function drawLegend() {
-  // τοποθέτηση ΔΕΞΙΑ, μετά τον διάμεσο χώρο
-  const x = INTER_X + 140;
-  const y = CAP_Y - 10;
+  const margin = 20;
   const w = 170;
   const h = 70;
+
+  // αγκύρωση στη ΔΕΞΙΑ πλευρά του DESIGN canvas
+  const x = DESIGN_W - w - margin;
+  const y = CAP_Y - 10;
 
   noStroke();
   fill(255, 245);
