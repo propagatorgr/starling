@@ -1,4 +1,6 @@
-/* ======================================================/*ΞΙΣΩΣΗ STARLING – ΤΕΛΙΚΗ RESPONSIVE ΕΚΔΟΣΗ
+/* ======================================================
+   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – ΤΕΛΙΚΗ RESPONSIVE ΥΛΟΠΟΙΗΣΗ
+   με collapsible legend (p5 DOM)
    ====================================================== */
 
 /* ---------- ΣΧΕΔΙΑΣΤΙΚΕΣ ΔΙΑΣΤΑΣΕΙΣ ---------- */
@@ -18,7 +20,12 @@ let proteins = [];
 
 let pressureSlider;
 let glycocalyxChk;
+
+// Legend DOM
 let legendDiv;
+let legendHeader;
+let legendContent;
+let legendOpen = false;
 
 /* ---------- SETUP ---------- */
 function setup() {
@@ -36,19 +43,33 @@ function setup() {
   glycocalyxChk = createCheckbox(" Glycocalyx ενεργό", true);
   glycocalyxChk.position(20, 50);
 
-  /* --- ΥΠΟΜΝΗΜΑ (p5 DOM, εκτός canvas) --- */
-  legendDiv = createDiv(`
-    <strong>Υπόμνημα</strong><br>
-    <span style="color:rgb(0,100,255)">●</span> Νερό<br>
-    <span style="color:rgb(150,0,200)">●</span> Νερό (επιστροφή)<br>
-    <span style="color:rgb(220,0,0)">●</span> Πρωτεΐνες
-  `);
-  legendDiv.style("background", "#fff");
-  legendDiv.style("padding", "10px 14px");
-  legendDiv.style("border-radius", "8px");
-  legendDiv.style("font-size", "14px");
-  legendDiv.style("box-shadow", "0 2px 6px rgba(0,0,0,0.15)");
+  /* ---------- COLLAPSIBLE LEGEND (p5 DOM) ---------- */
+  legendDiv = createDiv();
   legendDiv.style("position", "absolute");
+  legendDiv.style("background", "#fff");
+  legendDiv.style("border-radius", "8px");
+  legendDiv.style("box-shadow", "0 2px 6px rgba(0,0,0,0.15)");
+  legendDiv.style("font-size", "14px");
+  legendDiv.style("overflow", "hidden");
+  legendDiv.style("min-width", "170px");
+
+  legendHeader = createDiv("Υπόμνημα ▸");
+  legendHeader.parent(legendDiv);
+  legendHeader.style("padding", "8px 12px");
+  legendHeader.style("cursor", "pointer");
+  legendHeader.style("font-weight", "bold");
+  legendHeader.style("user-select", "none");
+
+  legendContent = createDiv(`
+    <div><span style="color:rgb(0,100,255)">●</span> Νερό</div>
+    <div><span style="color:rgb(150,0,200)">●</span> Νερό (επιστροφή)</div>
+    <div><span style="color:rgb(220,0,0)">●</span> Πρωτεΐνες</div>
+  `);
+  legendContent.parent(legendDiv);
+  legendContent.style("padding", "0 12px 10px 12px");
+  legendContent.style("display", "none");
+
+  legendHeader.mousePressed(toggleLegend);
 
   placeLegend();
 
@@ -65,8 +86,15 @@ function windowResized() {
   placeLegend();
 }
 
+/* ---------- LEGEND HELPERS ---------- */
+function toggleLegend() {
+  legendOpen = !legendOpen;
+  legendContent.style("display", legendOpen ? "block" : "none");
+  legendHeader.html(legendOpen ? "Υπόμνημα ▼" : "Υπόμνημα ▸");
+}
+
 function placeLegend() {
-  // Δεξιότερα από το slider, ψηλά
+  // ψηλά, δεξιά από slider – εκτός canvas
   legendDiv.position(260, 20);
 }
 
@@ -74,7 +102,7 @@ function placeLegend() {
 function draw() {
   background(245);
 
-  // Κλιμάκωση σε design coords
+  // Κλιμάκωση σχεδίου
   const s = width / DESIGN_W;
   scale(s);
 
@@ -133,10 +161,10 @@ class Water {
     const P = pressureSlider.value();
 
     if (this.state === "out") {
-      // Διήθηση (ΠΑΝΤΑ)
+      // ΠΑΝΤΑ διήθηση
       this.x += this.v * P;
 
-      // Παλιά Starling = ΧΩΡΙΣ glycocalyx
+      // Παλιό μοντέλο Starling (χωρίς glycocalyx)
       if (!glycocalyxChk.checked() && random() < 0.004) {
         this.state = "in";
         this.alpha = 0;
