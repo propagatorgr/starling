@@ -1,6 +1,5 @@
 /* ======================================================
-   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – ΤΕΛΙΚΗ RESPONSIVE ΥΛΟΠΟΙΗΣΗ
-   με collapsible legend (p5 DOM)
+   ΝΕΑ ΕΞΙΣΩΣΗ STARLING – ΤΕΛΙΚΗ ΔΙΔΑΚΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ
    ====================================================== */
 
 /* ---------- ΣΧΕΔΙΑΣΤΙΚΕΣ ΔΙΑΣΤΑΣΕΙΣ ---------- */
@@ -21,11 +20,9 @@ let proteins = [];
 let pressureSlider;
 let glycocalyxChk;
 
-// Legend DOM
-let legendDiv;
-let legendHeader;
-let legendContent;
-let legendOpen = false;
+/* ---------- LEGEND & INFO DOM ---------- */
+let legendDiv, legendHeader, legendContent, legendOpen = false;
+let infoDiv, infoOpen = false;
 
 /* ---------- SETUP ---------- */
 function setup() {
@@ -43,22 +40,15 @@ function setup() {
   glycocalyxChk = createCheckbox(" Glycocalyx ενεργό", true);
   glycocalyxChk.position(20, 50);
 
-  /* ---------- COLLAPSIBLE LEGEND (p5 DOM) ---------- */
+  /* ==================================================
+     COLLAPSIBLE LEGEND (p5 DOM)
+     ================================================== */
   legendDiv = createDiv();
-  legendDiv.style("position", "absolute");
-  legendDiv.style("background", "#fff");
-  legendDiv.style("border-radius", "8px");
-  legendDiv.style("box-shadow", "0 2px 6px rgba(0,0,0,0.15)");
-  legendDiv.style("font-size", "14px");
-  legendDiv.style("overflow", "hidden");
-  legendDiv.style("min-width", "170px");
+  styleBox(legendDiv, 170);
 
   legendHeader = createDiv("Υπόμνημα ▸");
   legendHeader.parent(legendDiv);
-  legendHeader.style("padding", "8px 12px");
-  legendHeader.style("cursor", "pointer");
-  legendHeader.style("font-weight", "bold");
-  legendHeader.style("user-select", "none");
+  styleHeader(legendHeader);
 
   legendContent = createDiv(`
     <div><span style="color:rgb(0,100,255)">●</span> Νερό</div>
@@ -69,9 +59,42 @@ function setup() {
   legendContent.style("padding", "0 12px 10px 12px");
   legendContent.style("display", "none");
 
-  legendHeader.mousePressed(toggleLegend);
+  legendHeader.mousePressed(() => {
+    legendOpen = !legendOpen;
+    legendContent.style("display", legendOpen ? "block" : "none");
+    legendHeader.html(legendOpen ? "Υπόμνημα ▼" : "Υπόμνημα ▸");
+  });
 
-  placeLegend();
+  /* ==================================================
+     OVERLAY INFO (p5 DOM)
+     ================================================== */
+  infoDiv = createDiv(`
+    <strong>Τι δείχνει το μοντέλο</strong><br><br>
+
+    ▶ <strong>Glycocalyx ανενεργό</strong><br>
+    Αντιστοιχεί στην <em>παλιά θεωρία Starling</em>:
+    θεωρούσαμε ότι υπάρχει επαναρρόφηση
+    στο φλεβικό άκρο του τριχοειδούς.<br><br>
+
+    ▶ <strong>Glycocalyx ενεργό</strong><br>
+    Η <em>νέα θεωρία Starling</em> δείχνει ότι
+    η επαναρρόφηση πρακτικά καταργείται,
+    λόγω του υπο‑glycocalyx χώρου.<br><br>
+
+    Η διαφορά δεν είναι η πίεση,
+    αλλά το <strong>μοντέλο του τριχοειδικού τοιχώματος</strong>.
+  `);
+  styleBox(infoDiv, 320);
+  infoDiv.style("display", "none");
+
+  const infoBtn = createButton("ℹ️ Τι δείχνει αυτό;");
+  infoBtn.position(260, 80);
+  infoBtn.mousePressed(() => {
+    infoOpen = !infoOpen;
+    infoDiv.style("display", infoOpen ? "block" : "none");
+  });
+
+  placeUI();
 
   /* --- Σωματίδια --- */
   for (let i = 0; i < 170; i++) water.push(new Water());
@@ -83,26 +106,19 @@ function windowResized() {
   const cw = min(windowWidth - 20, DESIGN_W);
   const ch = cw * (DESIGN_H / DESIGN_W);
   resizeCanvas(cw, ch);
-  placeLegend();
+  placeUI();
 }
 
-/* ---------- LEGEND HELPERS ---------- */
-function toggleLegend() {
-  legendOpen = !legendOpen;
-  legendContent.style("display", legendOpen ? "block" : "none");
-  legendHeader.html(legendOpen ? "Υπόμνημα ▼" : "Υπόμνημα ▸");
-}
-
-function placeLegend() {
-  // ψηλά, δεξιά από slider – εκτός canvas
+/* ---------- UI POSITION ---------- */
+function placeUI() {
   legendDiv.position(260, 20);
+  infoDiv.position(260, 120);
 }
 
 /* ---------- DRAW ---------- */
 function draw() {
   background(245);
 
-  // Κλιμάκωση σχεδίου
   const s = width / DESIGN_W;
   scale(s);
 
@@ -161,17 +177,15 @@ class Water {
     const P = pressureSlider.value();
 
     if (this.state === "out") {
-      // ΠΑΝΤΑ διήθηση
       this.x += this.v * P;
 
-      // Παλιό μοντέλο Starling (χωρίς glycocalyx)
+      // Παλιά Starling → επαναρρόφηση ΜΟΝΟ χωρίς glycocalyx
       if (!glycocalyxChk.checked() && random() < 0.004) {
         this.state = "in";
         this.alpha = 0;
       }
     }
     else if (this.state === "in") {
-      // Ήπια επαναρρόφηση
       this.x -= this.v * 1.2;
       this.alpha = min(this.alpha + 12, 255);
     }
@@ -205,4 +219,22 @@ class Protein {
     noStroke();
     circle(this.x, this.y, 7);
   }
+}
+
+/* ---------- UI HELPERS ---------- */
+function styleBox(div, w) {
+  div.style("position", "absolute");
+  div.style("background", "#fff");
+  div.style("border-radius", "10px");
+  div.style("box-shadow", "0 2px 8px rgba(0,0,0,0.2)");
+  div.style("padding", "10px 14px");
+  div.style("font-size", "14px");
+  div.style("max-width", w + "px");
+}
+
+function styleHeader(h) {
+  h.style("cursor", "pointer");
+  h.style("font-weight", "bold");
+  h.style("user-select", "none");
+  h.style("margin-bottom", "4px");
 }
